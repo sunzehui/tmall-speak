@@ -43,7 +43,21 @@ class BaiduUtil {
 
   }
 
+  async textToAudio(_text) {
+    console.log('开始执行文字转语音:' + _text);
+    let that = this;
+    return new Promise((_resolve, _reject) => {
+      that.baiduSpeechClient.text2audio(_text).then(function (result) {
+        if (!result.data) {
+          console.log(result);
+          _reject({status: false, err: result.err_msg});
+        }
 
+        _resolve({status: true, msg: result.data});
+
+      })
+    })
+  }
   async ocrFilter(_image, _filter) {
     console.log('开始过滤指定指令识别图片中的文字');
     let words = await this.ocr(_image);
