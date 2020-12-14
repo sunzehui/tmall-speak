@@ -3,10 +3,21 @@ const fs = require('fs');
 const express = require('express');
 const TmallUtil = require( './util/tmall_util.js')
 const app = express();
+const BaiduUtil = require('./util/baidu_util.js')
 //form表单需要的中间件。
 const mutipart = require('connect-multiparty');
 const mutipartMiddeware = mutipart();
 const get_contentType = require('./util/getContentType');
+let t = new TmallUtil()
+let b = new BaiduUtil()
+app.get('/t2v',async function (req,res){
+
+    console.log(req.query.text)
+
+    res.writeHead(200,{'content-Type':'audio/*'})
+    const buf = await b.textToAudio(req.query.text)
+    res.end(buf.msg)
+})
 
 //这里就是接受form表单请求的接口路径，请求方式为post。
 app.post('/upload',mutipartMiddeware,function (req,res) {
@@ -14,7 +25,7 @@ app.post('/upload',mutipartMiddeware,function (req,res) {
     console.log(req.files);
 
     //成功接受到浏览器传来的文件。我们可以在这里写对文件的一系列操作。例如重命名，修改文件储存路径 。等等。
-    let t = new TmallUtil()
+
     t.ocrCheck(req.files.file.path)
         .then(r=>{
             res.send(r.toString());
