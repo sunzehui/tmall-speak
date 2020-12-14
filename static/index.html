@@ -22,12 +22,6 @@
             height: 80vh;
         }
 
-        .el-upload-dragger {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
         .avatar-uploader .el-upload {
             border: 1px dashed #d9d9d9;
             border-radius: 6px;
@@ -58,39 +52,56 @@
     </style>
 
     <script src="vue.js"></script>
-    <script src="iview.js"></script>
+    <script src="element.js"></script>
 
 </head>
 
 <body style="padding-top: 50px;height: 100vh; overflow: hidden;">
 <div id="app">
+    <template>
 
-    <el-form ref="form" :model="form" label-width="auto">
-        <el-form-item label="延时（单位毫秒）">
-            <el-input v-model="form.delay"></el-input>
-        </el-form-item>
+        <el-form ref="form" :model="form" label-width="auto">
+            <el-form-item label="延时（单位毫秒）">
+                <el-input v-model="form.delay"></el-input>
+            </el-form-item>
+            <el-form-item label="播放语速（数字）">
+                <el-input v-model="speakOpt[0]"></el-input>
+            </el-form-item>
+            <el-form-item label="音调高低（数字）">
+                <el-input v-model="speakOpt[1]"></el-input>
+            </el-form-item>
+            <el-form-item label="播放音量（数字）">
+                <el-input v-model="speakOpt[2]"></el-input>
+            </el-form-item>
+            <el-form-item>
+                <el-button type="primary" @click="onSubmit">立即播放</el-button>
+            </el-form-item>
+        </el-form>
 
-    </el-form>
 
-    <el-upload
+        <el-upload
 
-            :on-success="handleAvatarSuccess"
-            class="upload-demo"
-            drag
-            action="upload/"
-            multiple>
+                :on-success="handleAvatarSuccess"
+                class="upload-demo"
+                drag
+                action="upload/"
+                multiple>
 
-        <div class="box">
+            <div class="box">
 
-            <i class="el-icon-upload"></i>
-            <img v-if="imageUrl" :src="imageUrl" class="avatar">
-            <div v-else class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
-            <div v-else class="el-upload__tip" slot="tip">只能上传jpg/png文件，且不超过500kb</div>
+                <img v-if="imageUrl" :src="imageUrl" class="avatar">
+                <template v-else="imageUrl">
 
-        </div>
+                    <i class="el-icon-upload"></i>
+                    <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+                    <div class="el-upload__tip" slot="tip">只能上传jpg/png文件，且不超过500kb</div>
+                </template>
 
-    </el-upload>
+            </div>
 
+        </el-upload>
+        <p>{{speakOpt}}</p>
+    </template>
 
 </div>
 </body>
@@ -104,42 +115,46 @@
                 imageUrl: '',
                 form: {
                     delay: '',
-                }
+                },
+                res: [],
+                speakObj: null,
+                speakOpt: []
             };
         },
-        computed() {
-            function delay() {
-                return this.data().form.delay ? 3000 : this.data().form.delay
+        computed: {
+            delay() {
+                return this.form.delay ?   this.form.delay:3000
             }
         },
         methods: {
             onSubmit() {
-                console.log('submit!');
+                console.log(this.form.delay);
+                this.dealMsg(this.res);
             },
             sleep(t) {
                 return new Promise(resolve => setTimeout(resolve, t));
             },
             TMSpeak(m) {
-                //msg.rate = 4 播放语速
-                //msg.pitch = 10 音调高低
-                //msg.text = "播放文本"
-                //msg.volume = 0.5 播放音量
-                speechSynthesis.speak(new SpeechSynthesisUtterance(m));
+                this.speakObj = new SpeechSynthesisUtterance()
+                with (this.speakObj) {
+                    rate = parseInt(this.speakOpt[0])||1
+                    pitch = parseInt(this.speakOpt[1])||1
+                    text = m
+                    volume = parseInt(this.speakOpt[2])||1
+                }
+                console.log(this.speakObj);
+                speechSynthesis.speak(this.speakObj)
             },
-            async dealMsg(data) {
-                const msg = data.split(",")
-                console.log(msg);
+            async dealMsg(msg) {
                 for (const m of msg) {
                     this.TMSpeak(m)
-                    console.log(1);
                     await this.sleep(this.delay)
-
                 }
+                console.log(this.delay);
             },
             handleAvatarSuccess(res, file) {
                 this.imageUrl = URL.createObjectURL(file.raw);
-                this.dealMsg(res);
-                console.log(res);
+                this.res = res.split(",")
             }
         }
     }
