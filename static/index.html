@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        @import url("//unpkg.com/element-ui@2.14.1/lib/theme-chalk/index.css");
+
+        html, body {
+            height: 100%;
+        }
+
+        #app,.upload-demo, .el-upload-dragger, .el-upload, .el-upload img {
+            height: 100%;
+            width: 100%;
+        }
+        .upload-demo{
+            height: 80vh;
+        }
+        .el-upload-dragger{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .avatar-uploader .el-upload {
+            border: 1px dashed #d9d9d9;
+            border-radius: 6px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .avatar-uploader .el-upload:hover {
+            border-color: #409EFF;
+        }
+
+        .avatar-uploader-icon {
+            font-size: 28px;
+            color: #8c939d;
+            width: 178px;
+            height: 178px;
+            line-height: 178px;
+            text-align: center;
+        }
+
+        .avatar {
+            width: 178px;
+            height: 178px;
+            display: block;
+        }
+
+    </style>
+
+    <script src="vue.js"></script>
+    <script src="iview.js"></script>
+
+</head>
+
+<body style="padding-top: 50px;height: 100vh; overflow: hidden;">
+<div id="app" >
+
+    <el-form ref="form" :model="form" label-width="auto">
+        <el-form-item label="延时（单位毫秒）">
+            <el-input v-model="form.delay"></el-input>
+        </el-form-item>
+
+    </el-form>
+
+    <el-upload
+
+            :on-success="handleAvatarSuccess"
+            :before-upload="beforeAvatarUpload"
+            class="upload-demo"
+            drag
+            action="upload/"
+            multiple>
+
+    <div class="box">
+
+        <i class="el-icon-upload"></i>
+        <img v-if="imageUrl" :src="imageUrl" class="avatar">
+        <div v-else="imageUrl" class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+        <div v-else="imageUrl" class="el-upload__tip" slot="tip">只能上传jpg/png文件，且不超过500kb</div>
+
+    </div>
+
+    </el-upload>
+
+
+
+
+</div>
+</body>
+</html>
+
+
+<script>
+    var Main = {
+        data() {
+            return {
+                imageUrl: '',
+                form: {
+                    delay: '',
+                }
+            };
+        },
+        methods: {
+            onSubmit() {
+                console.log('submit!');
+            },
+            sleep(t) {
+                return new Promise(resolve => setTimeout(resolve, t));
+            },
+            TMSpeak(m) {
+                //msg.rate = 4 播放语速
+                //msg.pitch = 10 音调高低
+                //msg.text = "播放文本"
+                //msg.volume = 0.5 播放音量
+                speechSynthesis.speak(new SpeechSynthesisUtterance(m));
+            },
+            async dealMsg(data) {
+                const msg = data.split(",")
+                console.log(msg);
+                for (const m of msg) {
+                    this.TMSpeak(m)
+                    console.log(1);
+                    await this.sleep(3000)
+
+                }
+            },
+            handleAvatarSuccess(res, file) {
+                this.imageUrl = URL.createObjectURL(file.raw);
+                this.dealMsg(res);
+                console.log(res);
+            },
+            beforeAvatarUpload(file) {
+                const isJPG = file.type === 'image/jpeg';
+                const isLt2M = file.size / 1024 / 1024 < 2;
+
+                if (!isJPG) {
+                    this.$message.error('上传头像图片只能是 JPG 格式!');
+                }
+                if (!isLt2M) {
+                    this.$message.error('上传头像图片大小不能超过 2MB!');
+                }
+                return isJPG && isLt2M;
+            }
+        }
+    }
+    var Ctor = Vue.extend(Main)
+    new Ctor().$mount('#app')
+</script>
