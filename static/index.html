@@ -13,14 +13,16 @@
             height: 100%;
         }
 
-        #app,.upload-demo, .el-upload-dragger, .el-upload, .el-upload img {
+        #app, .upload-demo, .el-upload-dragger, .el-upload, .el-upload img {
             height: 100%;
             width: 100%;
         }
-        .upload-demo{
+
+        .upload-demo {
             height: 80vh;
         }
-        .el-upload-dragger{
+
+        .el-upload-dragger {
             display: flex;
             justify-content: center;
             align-items: center;
@@ -61,7 +63,7 @@
 </head>
 
 <body style="padding-top: 50px;height: 100vh; overflow: hidden;">
-<div id="app" >
+<div id="app">
 
     <el-form ref="form" :model="form" label-width="auto">
         <el-form-item label="延时（单位毫秒）">
@@ -73,24 +75,21 @@
     <el-upload
 
             :on-success="handleAvatarSuccess"
-            :before-upload="beforeAvatarUpload"
             class="upload-demo"
             drag
             action="upload/"
             multiple>
 
-    <div class="box">
+        <div class="box">
 
-        <i class="el-icon-upload"></i>
-        <img v-if="imageUrl" :src="imageUrl" class="avatar">
-        <div v-else="imageUrl" class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
-        <div v-else="imageUrl" class="el-upload__tip" slot="tip">只能上传jpg/png文件，且不超过500kb</div>
+            <i class="el-icon-upload"></i>
+            <img v-if="imageUrl" :src="imageUrl" class="avatar">
+            <div v-else class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+            <div v-else class="el-upload__tip" slot="tip">只能上传jpg/png文件，且不超过500kb</div>
 
-    </div>
+        </div>
 
     </el-upload>
-
-
 
 
 </div>
@@ -107,6 +106,11 @@
                     delay: '',
                 }
             };
+        },
+        computed() {
+            function delay() {
+                return this.data().form.delay ? 3000 : this.data().form.delay
+            }
         },
         methods: {
             onSubmit() {
@@ -128,7 +132,7 @@
                 for (const m of msg) {
                     this.TMSpeak(m)
                     console.log(1);
-                    await this.sleep(3000)
+                    await this.sleep(this.delay)
 
                 }
             },
@@ -136,18 +140,6 @@
                 this.imageUrl = URL.createObjectURL(file.raw);
                 this.dealMsg(res);
                 console.log(res);
-            },
-            beforeAvatarUpload(file) {
-                const isJPG = file.type === 'image/jpeg';
-                const isLt2M = file.size / 1024 / 1024 < 2;
-
-                if (!isJPG) {
-                    this.$message.error('上传头像图片只能是 JPG 格式!');
-                }
-                if (!isLt2M) {
-                    this.$message.error('上传头像图片大小不能超过 2MB!');
-                }
-                return isJPG && isLt2M;
             }
         }
     }
